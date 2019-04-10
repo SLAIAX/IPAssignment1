@@ -28,7 +28,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h> //required by getaddrinfo() and special constants
 
-#define WSVERS MAKEWORD(2,0)
+#define WSVERS MAKEWORD(2,2)
 WSADATA wsadata;
 
 
@@ -270,8 +270,10 @@ s = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 //********************************************************************
 //Respond with welcome message
 //*******************************************************************
+			printf("<< DEBUG : Pre-Send welcome message>>");
 			 sprintf(send_buffer,"220 FTP Server ready. \r\n");
 			 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+			 printf("<< DEBUG : Post-Send welcome message>>");
 
 			//********************************************************************
 			//COMMUNICATION LOOP per CLIENT
@@ -346,57 +348,57 @@ s = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 					 // closesocket(ns);
 				 }
 				 //---
-				 // if(strncmp(receive_buffer,"PORT",4)==0) {
-					//  s_data_act = socket(AF_INET, SOCK_STREAM, 0);
-					//  //local variables
-					//  //unsigned char act_port[2];
-					//  int act_port[2];
-					//  int act_ip[4], port_dec;
-					//  char ip_decimal[40];
-					//  printf("===================================================\n");
-					//  printf("\n\tActive FTP mode, the client is listening... \n");
-					//  active=1;//flag for active connection
-					//  //int scannedItems = sscanf(receive_buffer, "PORT %d,%d,%d,%d,%d,%d",
-					//  //		&act_ip[0],&act_ip[1],&act_ip[2],&act_ip[3],
-					//  //     (int*)&act_port[0],(int*)&act_port[1]);
+				 if(strncmp(receive_buffer,"PORT",4)==0) {
+					 s_data_act = socket(AF_INET, SOCK_STREAM, 0);
+					 //local variables
+					 //unsigned char act_port[2];
+					 int act_port[2];
+					 int act_ip[4], port_dec;
+					 char ip_decimal[40];
+					 printf("===================================================\n");
+					 printf("\n\tActive FTP mode, the client is listening... \n");
+					 active=1;//flag for active connection
+					 //int scannedItems = sscanf(receive_buffer, "PORT %d,%d,%d,%d,%d,%d",
+					 //		&act_ip[0],&act_ip[1],&act_ip[2],&act_ip[3],
+					 //     (int*)&act_port[0],(int*)&act_port[1]);
 					 
-					//  int scannedItems = sscanf(receive_buffer, "PORT %d,%d,%d,%d,%d,%d",
-					// 		&act_ip[0],&act_ip[1],&act_ip[2],&act_ip[3],
-					//       &act_port[0],&act_port[1]);
+					 int scannedItems = sscanf(receive_buffer, "PORT %d,%d,%d,%d,%d,%d",
+							&act_ip[0],&act_ip[1],&act_ip[2],&act_ip[3],
+					      &act_port[0],&act_port[1]);
 					 
-					//  if(scannedItems < 6) {
-		   //       	    sprintf(send_buffer,"501 Syntax error in arguments \r\n");
-					// 	printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
-					// 	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					//     //if (bytes < 0) break;
-			  //           break;
-		   //           }
+					 if(scannedItems < 6) {
+		         	    sprintf(send_buffer,"501 Syntax error in arguments \r\n");
+						printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+						bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+					    //if (bytes < 0) break;
+			            break;
+		             }
 					 
-					//  local_data_addr_act.sin_family=AF_INET;//local_data_addr_act  //ipv4 only
-					//  sprintf(ip_decimal, "%d.%d.%d.%d", act_ip[0], act_ip[1], act_ip[2],act_ip[3]);
-					//  printf("\tCLIENT's IP is %s\n",ip_decimal);  //IPv4 format
-					//  local_data_addr_act.sin_addr.s_addr=inet_addr(ip_decimal);  //ipv4 only
-					//  port_dec=act_port[0];
-					//  port_dec=port_dec << 8;
-					//  port_dec=port_dec+act_port[1];
-					//  printf("\tCLIENT's Port is %d\n",port_dec);
-					//  printf("===================================================\n");
-					//  local_data_addr_act.sin_port=htons(port_dec); //ipv4 only
-					//  if (connect(s_data_act, (struct sockaddr *)&local_data_addr_act, (int) sizeof(struct sockaddr)) != 0){
-					// 	 printf("trying connection in %s %d\n",inet_ntoa(local_data_addr_act.sin_addr),ntohs(local_data_addr_act.sin_port));
-					// 	 sprintf(send_buffer, "425 Something is wrong, can't start active connection... \r\n");
-					// 	 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					// 	 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
-					// 	 closesocket(s_data_act);
-					//  }
-					//  else {
-					// 	 sprintf(send_buffer, "200 PORT Command successful\r\n");
-					// 	 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					// 	 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
-					// 	 printf("Connected to client\n");
-					//  }
+					 local_data_addr_act.ss_family=AF_INET6;//local_data_addr_act  //ipv4 only
+					 sprintf(ip_decimal, "%d.%d.%d.%d", act_ip[0], act_ip[1], act_ip[2],act_ip[3]);
+					 printf("\tCLIENT's IP is %s\n",ip_decimal);  //IPv4 format
+					 local_data_addr_act.sin_addr.s_addr=inet_addr(ip_decimal);  //ipv4 only
+					 port_dec=act_port[0];
+					 port_dec=port_dec << 8;
+					 port_dec=port_dec+act_port[1];
+					 printf("\tCLIENT's Port is %d\n",port_dec);
+					 printf("===================================================\n");
+					 local_data_addr_act.sin_port=htons(port_dec); //ipv4 only
+					 if (connect(s_data_act, (struct sockaddr *)&local_data_addr_act, (int) sizeof(struct sockaddr)) != 0){
+						 printf("trying connection in %s %d\n",inet_ntoa(local_data_addr_act.sin_addr),ntohs(local_data_addr_act.sin_port));
+						 sprintf(send_buffer, "425 Something is wrong, can't start active connection... \r\n");
+						 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+						 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+						 closesocket(s_data_act);
+					 }
+					 else {
+						 sprintf(send_buffer, "200 PORT Command successful\r\n");
+						 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+						 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+						 printf("Connected to client\n");
+					 }
 
-				 // }
+				 }
 				 //---				 
 				 //technically, LIST is different than NLST,but we make them the same here
 				 if ( (strncmp(receive_buffer,"LIST",4)==0) || (strncmp(receive_buffer,"NLST",4)==0))   {
