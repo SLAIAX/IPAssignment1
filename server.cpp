@@ -20,6 +20,8 @@
 
 //=======================================================================================================================
 
+#define USE_IPV6 true
+
 #include <stdio.h> 
 #include <string.h>
 #include <stdlib.h>
@@ -29,6 +31,8 @@
 #define WSVERS MAKEWORD(2,0)
 WSADATA wsadata;
 
+
+#define DEFAULT_PORT "1234" 
 //********************************************************************
 //MAIN
 //********************************************************************
@@ -58,10 +62,13 @@ int main(int argc, char *argv[]) {
     }
 		 // struct sockaddr_storage localaddr,remoteaddr;  //ipv4 only
 		 struct sockaddr_storage local_data_addr_act;   //ipv4 only
-		 struct clientAddress;
+		 struct sockaddr_storage clientAddress;
+		 char clientHost[NI_MAXHOST]; 
+		 char clientService[NI_MAXSERV];
 		 SOCKET s,ns;
 		 SOCKET ns_data, s_data_act;
 		 char send_buffer[200],receive_buffer[200];
+		 char portNum[NI_MAXSERV];
 		
          ns_data=INVALID_SOCKET;
 
@@ -73,8 +80,8 @@ int main(int argc, char *argv[]) {
 		 printf("\n===============================\n");
 	
 		 
-		 memset(&localaddr,0,sizeof(localaddr));//clean up the structure
-		 memset(&remoteaddr,0,sizeof(remoteaddr));//clean up the structure
+		 // memset(&localaddr,0,sizeof(localaddr));//clean up the structure
+		 // memset(&remoteaddr,0,sizeof(remoteaddr));//clean up the structure
 		 
 //********************************************************************
 //SOCKET
