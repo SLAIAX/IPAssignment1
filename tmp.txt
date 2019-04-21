@@ -1,0 +1,15 @@
+ Volume in drive C has no label.
+ Volume Serial Number is 060F-6512
+
+ Directory of C:\Users\Benjamin\Documents\A1-START-UP_Windows10_compatible\A1-START-UP_Windows10_compatible
+
+11/04/2019  11:13 AM    <DIR>          .
+11/04/2019  11:13 AM    <DIR>          ..
+10/04/2019  09:33 AM                18 clean.bat
+10/04/2019  09:33 AM               176 makefile
+10/04/2019  09:33 AM            14,020 server.cpp
+10/04/2019  09:37 AM           340,274 server.exe
+10/04/2019  09:37 AM             6,984 server.o
+11/04/2019  12:41 PM                 0 tmp.txt
+               6 File(s)        361,472 bytes
+               2 Dir(s)  1,908,799,848,448 bytes free
