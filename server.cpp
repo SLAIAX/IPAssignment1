@@ -270,7 +270,6 @@ int main(int argc, char *argv[]) {
 					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 					 if (bytes < 0) break;
-					 // closesocket(ns);
 				 }
 				 //---
 				 if(strncmp(receive_buffer,"EPRT",4)==0) {
@@ -289,12 +288,9 @@ int main(int argc, char *argv[]) {
 					 }
 					 sscanf(token, "%d", &port);
 					 printf("port is %d\n", port);
-
-					 
 					 printf("===================================================\n");
 					 printf("\n\tActive FTP mode, the client is listening... \n");
 					 active=1;//flag for active connection
-					 
 					 printf("\tCLIENT's IP is %s\n", clientHost);  
 					 printf("\tCLIENT's Port is %d\n",port);
 					 printf("===================================================\n");
@@ -321,15 +317,22 @@ int main(int argc, char *argv[]) {
 						 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 						 printf("Connected to client\n");
 					 }
-
 				 }
 				 //---				 
 				 //technically, LIST is different than NLST,but we make them the same here
 				 if ( (strncmp(receive_buffer,"LIST",4)==0) || (strncmp(receive_buffer,"NLST",4)==0))   {
 					 //system("ls > tmp.txt");//change that to 'dir', so windows can understand
 					 system("dir > tmp.txt");
-					 FILE *fin=fopen("tmp.txt","r");//open tmp.txt file
-					 //sprintf(send_buffer,"125 Transfering... \r\n");
+					 if( access( "tmp.txt", F_OK ) != -1 ) {
+					 	// file exists
+					 	FILE *fin=fopen("tmp.txt","r");//open tmp.txt file
+					 } else {
+					 	sprintf(send_buffer,"510 Directory command failed \r\n");
+					  	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+					  	if (active==0 )closesocket(ns_data);
+					 	else closesocket(s_data_act);
+					  	break;
+					 }
 					 sprintf(send_buffer,"150 Opening ASCII mode data connection... \r\n");
 					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
@@ -341,7 +344,6 @@ int main(int argc, char *argv[]) {
 						 else send(s_data_act, send_buffer, strlen(send_buffer), 0);
 					 }
 					 fclose(fin);
-					 //sprintf(send_buffer,"250 File transfer completed... \r\n");
 					 sprintf(send_buffer,"226 File transfer complete. \r\n");
 					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
@@ -362,15 +364,19 @@ int main(int argc, char *argv[]) {
 						 if(mode == 'I'){
 						 	fin=fopen(filename,"rb");
 						 	sprintf(send_buffer, "150 Opening Binary mode data connection\r\n");
+						 	printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 						 } else {
 						 	fin=fopen(filename,"r");
 						 	sprintf(send_buffer,"150 Opening ASCII mode data connection... \r\n");
+						 	printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 						 }
 						 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 					 } else {
-    					sprintf(send_buffer,"226 File transfer failed. \r\n");
+    					sprintf(send_buffer,"550 File transfer failed. File does not exist in directory. \r\n");
 					  	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					  	return;
+					  	if (active==0 )closesocket(ns_data);
+						else closesocket(s_data_act);
+					  	break;
 					 }
 					 // TEST CODE
 
@@ -387,33 +393,13 @@ int main(int argc, char *argv[]) {
 
 						fclose(fin);
 					  	sprintf(send_buffer,"226 File transfer complete. \r\n");
+					  	printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 					  	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 						if (active==0 )closesocket(ns_data);
 						else closesocket(s_data_act);
-
-					 //
-					 // sprintf(send_buffer,"150 Opening ASCII mode data connection... \r\n");
-					 // printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
-					 // bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					 // char temp_buffer[80];
-					 // while (!feof(fin)){
-						//  fgets(temp_buffer,78,fin);
-						//  sprintf(send_buffer,"%s",temp_buffer);
-						//  if (active==0) send(ns_data, send_buffer, strlen(send_buffer), 0);
-						//  else send(s_data_act, send_buffer, strlen(send_buffer), 0);
-					 // }
-					 // fclose(fin);
-					 // //sprintf(send_buffer,"250 File transfer completed... \r\n");
-					 // sprintf(send_buffer,"226 File transfer complete. \r\n");
-					 // printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
-					 // bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					 // if (active==0 )closesocket(ns_data);
-					 // else closesocket(s_data_act);
 				 }		 
 				 // ---
-				 if ( (strncmp(receive_buffer,"TYPE",4)==0))   {  
-				 	// Stuff
-				 	
+				 if ( (strncmp(receive_buffer,"TYPE",4)==0))   {  			 	
 				 	sscanf(receive_buffer, "TYPE %c", &mode);
 				 	if(mode == 'A'){
 				 		sprintf(send_buffer,"200 Type set to A\r\n");
