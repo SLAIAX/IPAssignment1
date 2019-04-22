@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <unistd.h>
 
 #define WSVERS MAKEWORD(2,2)
 #define IPV6 true
@@ -353,18 +354,24 @@ int main(int argc, char *argv[]) {
                  //---	
                  if ( (strncmp(receive_buffer,"RETR",4)==0))   {
 					 char filename[80];
+					  FILE *fin;
 					 // must get filename from the reply
 					 sscanf(receive_buffer, "RETR %s", filename);
-					 FILE *fin;
-					 if(mode == 'I'){
-					 	fin=fopen(filename,"rb");
-					 	sprintf(send_buffer, "150 Opening Binary mode data connection\r\n");
+					 if( access( filename, F_OK ) != -1 ) {
+   					 	// file exists
+						 if(mode == 'I'){
+						 	fin=fopen(filename,"rb");
+						 	sprintf(send_buffer, "150 Opening Binary mode data connection\r\n");
+						 } else {
+						 	fin=fopen(filename,"r");
+						 	sprintf(send_buffer,"150 Opening ASCII mode data connection... \r\n");
+						 }
+						 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 					 } else {
-					 	fin=fopen(filename,"r");
-					 	sprintf(send_buffer,"150 Opening ASCII mode data connection... \r\n");
+    					sprintf(send_buffer,"226 File transfer failed. \r\n");
+					  	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+					  	return;
 					 }
-					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					 //sprintf(send_buffer,"125 Transfering... \r\n");
 					 // TEST CODE
 
 					 	int fileSize;
@@ -372,13 +379,11 @@ int main(int argc, char *argv[]) {
 					 	fileSize = ftell(fin);
 					 	fseek(fin, 0, SEEK_SET);
 
-					 	
-					 	
-
 					 	char temp_buffer[fileSize];
 
     					fread(temp_buffer, 1, sizeof(temp_buffer), fin);
-    					send(s_data_act, temp_buffer, sizeof(temp_buffer), 0);
+    					if (active==0) send(ns_data, temp_buffer, sizeof(temp_buffer), 0);
+    					else send(s_data_act, temp_buffer, sizeof(temp_buffer), 0);
 
 						fclose(fin);
 					  	sprintf(send_buffer,"226 File transfer complete. \r\n");
