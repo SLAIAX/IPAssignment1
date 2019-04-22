@@ -72,6 +72,8 @@ int main(int argc, char *argv[]) {
 		 SOCKET s,ns;
 		 SOCKET ns_data, s_data_act;
 		 char send_buffer[200],receive_buffer[200];
+
+		 char mode = 'A';
 		
 		 s = INVALID_SOCKET;
          ns_data=INVALID_SOCKET;
@@ -353,7 +355,15 @@ int main(int argc, char *argv[]) {
 					 char filename[80];
 					 // must get filename from the reply
 					 sscanf(receive_buffer, "RETR %s", filename);
-					 FILE *fin=fopen(filename,"rb");//open tmp.txt file
+					 FILE *fin;
+					 if(mode == 'I'){
+					 	fin=fopen(filename,"rb");
+					 	sprintf(send_buffer, "150 Opening Binary mode data connection\r\n");
+					 } else {
+					 	fin=fopen(filename,"r");
+					 	sprintf(send_buffer,"150 Opening ASCII mode data connection... \r\n");
+					 }
+					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 					 //sprintf(send_buffer,"125 Transfering... \r\n");
 					 // TEST CODE
 
@@ -362,8 +372,8 @@ int main(int argc, char *argv[]) {
 					 	fileSize = ftell(fin);
 					 	fseek(fin, 0, SEEK_SET);
 
-					 	sprintf(send_buffer, "150 Opening Binary mode data connection\r\n");
-					 	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+					 	
+					 	
 
 					 	char temp_buffer[fileSize];
 
@@ -398,7 +408,7 @@ int main(int argc, char *argv[]) {
 				 // ---
 				 if ( (strncmp(receive_buffer,"TYPE",4)==0))   {  
 				 	// Stuff
-				 	char mode;
+				 	
 				 	sscanf(receive_buffer, "TYPE %c", &mode);
 				 	if(mode == 'A'){
 				 		sprintf(send_buffer,"200 Type set to A\r\n");
