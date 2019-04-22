@@ -353,32 +353,61 @@ int main(int argc, char *argv[]) {
 					 char filename[80];
 					 // must get filename from the reply
 					 sscanf(receive_buffer, "RETR %s", filename);
-					 FILE *fin=fopen(filename,"r");//open tmp.txt file
+					 FILE *fin=fopen(filename,"rb");//open tmp.txt file
 					 //sprintf(send_buffer,"125 Transfering... \r\n");
-					 sprintf(send_buffer,"150 Opening ASCII mode data connection... \r\n");
-					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
-					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					 char temp_buffer[80];
-					 while (!feof(fin)){
-						 fgets(temp_buffer,78,fin);
-						 sprintf(send_buffer,"%s",temp_buffer);
-						 if (active==0) send(ns_data, send_buffer, strlen(send_buffer), 0);
-						 else send(s_data_act, send_buffer, strlen(send_buffer), 0);
-					 }
-					 fclose(fin);
-					 //sprintf(send_buffer,"250 File transfer completed... \r\n");
-					 sprintf(send_buffer,"226 File transfer complete. \r\n");
-					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
-					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					 if (active==0 )closesocket(ns_data);
-					 else closesocket(s_data_act);
+					 // TEST CODE
+
+					 	int fileSize;
+					 	fseek(fin, 0, SEEK_END);
+					 	fileSize = ftell(fin);
+					 	fseek(fin, 0, SEEK_SET);
+
+					 	sprintf(send_buffer, "150 Opening Bnary mode data connection\r\n");
+					 	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+
+					 	char temp_buffer[fileSize];
+					 	while(!feof(fin)) {
+    						fread(temp_buffer, 1, sizeof(temp_buffer), fin);
+    						send(s_data_act, temp_buffer, sizeof(temp_buffer), 0);
+							memset(&temp_buffer, 0, sizeof(temp_buffer));
+						}
+						fclose(fin);
+					  	sprintf(send_buffer,"226 File transfer complete. \r\n");
+					  	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+						if (active==0 )closesocket(ns_data);
+						else closesocket(s_data_act);
+
+					 //
+					 // sprintf(send_buffer,"150 Opening ASCII mode data connection... \r\n");
+					 // printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+					 // bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+					 // char temp_buffer[80];
+					 // while (!feof(fin)){
+						//  fgets(temp_buffer,78,fin);
+						//  sprintf(send_buffer,"%s",temp_buffer);
+						//  if (active==0) send(ns_data, send_buffer, strlen(send_buffer), 0);
+						//  else send(s_data_act, send_buffer, strlen(send_buffer), 0);
+					 // }
+					 // fclose(fin);
+					 // //sprintf(send_buffer,"250 File transfer completed... \r\n");
+					 // sprintf(send_buffer,"226 File transfer complete. \r\n");
+					 // printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+					 // bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+					 // if (active==0 )closesocket(ns_data);
+					 // else closesocket(s_data_act);
 				 }		 
 				 // ---
 				 if ( (strncmp(receive_buffer,"TYPE",4)==0))   {  
 				 	// Stuff
 				 	char mode;
-				 	sscanf(receive_buffer, "TYPE %c", mode);
-
+				 	sscanf(receive_buffer, "TYPE %c", &mode);
+				 	if(mode == 'A'){
+				 		sprintf(send_buffer,"200 Type set to A\r\n");
+				 	} else {
+				 		sprintf(send_buffer,"200 Type set to I\r\n");
+				 	}
+				 	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+					if (bytes < 0) break;
 				 } 
 			 //=================================================================================	 
 			 }//End of COMMUNICATION LOOP per CLIENT
@@ -388,7 +417,7 @@ int main(int argc, char *argv[]) {
 //CLOSE SOCKET
 //********************************************************************
 			 closesocket(ns);
-			 printf("DISCONNECTED from %s\n",clientService);
+			 printf("DISCONNECTED from %s\n",clientHost);
 			 //sprintf(send_buffer, "221 Bye bye, server close the connection ... \r\n");
 			 //printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 			 //bytes = send(ns, send_buffer, strlen(send_buffer), 0);
