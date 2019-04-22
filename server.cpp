@@ -29,6 +29,8 @@
 #include <ws2tcpip.h>
 
 #define WSVERS MAKEWORD(2,2)
+#define IPV6 true
+
 WSADATA wsadata;
 
 //********************************************************************
@@ -56,12 +58,16 @@ int main(int argc, char *argv[]) {
 		 	printf("\n===============================\n");
 		 	printf("The TCP server was initiliazed with winsock 2.2\n");
 		 }
-		 struct sockaddr_storage localaddr,remoteaddr;  
-		 struct sockaddr_storage local_data_addr_act;   
+		 struct sockaddr_storage localaddr,remoteaddr;    
 
 		 char clientHost[NI_MAXHOST];
 		 char clientService[NI_MAXSERV];
 		 char portNum[NI_MAXSERV];
+
+		 bool isAuth = false;
+
+		 char username[80];
+		 char password[80];
 
 		 SOCKET s,ns;
 		 SOCKET ns_data, s_data_act;
@@ -84,7 +90,11 @@ int main(int argc, char *argv[]) {
 //********************************************************************
 //SOCKET
 //********************************************************************
-		 hints.ai_family = AF_INET6;
+		 if(IPV6){	
+		 	hints.ai_family = AF_INET6;
+		 } else {
+		 	hints.ai_family = AF_INET;
+		 }
 		 hints.ai_socktype = SOCK_STREAM;
 		 hints.ai_protocol = IPPROTO_TCP;
 		 hints.ai_flags = AI_PASSIVE;
@@ -214,14 +224,23 @@ int main(int argc, char *argv[]) {
 //********************************************************************				 
 				 if (strncmp(receive_buffer,"USER",4)==0)  {
 					 printf("Logging in... \n");
-					 sprintf(send_buffer,"331 Password required (anything will do really... :-) \r\n");
+					 // get username
+					 sscanf(receive_buffer, "USER %s", username);
+					 sprintf(send_buffer,"331 Password required \r\n");
 					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 					 if (bytes < 0) break;
 				 }
 				 //---
 				 if (strncmp(receive_buffer,"PASS",4)==0)  {
-					 
-					 sprintf(send_buffer,"230 Public login sucessful \r\n");
+					 // get password
+					 sscanf(receive_buffer, "PASS %s", password);
+					 if((strcmp(username, "napoleon") == 0) && (strcmp(password, "334") == 0)){
+					 	sprintf(send_buffer,"230 Public login sucessful\r\n");
+					 	isAuth = true;
+					 } else {
+					 	sprintf(send_buffer,"230 Public login sucessful\r\n");
+					 	isAuth = false;
+					 }
 					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 					 if (bytes < 0) break;
@@ -236,8 +255,7 @@ int main(int argc, char *argv[]) {
 				 }
 				 //---
 				 if (strncmp(receive_buffer,"OPTS",4)==0)  {
-					 printf("unrecognised command \n");
-					 sprintf(send_buffer,"502 command not implemented\r\n");
+					 sprintf(send_buffer,"550 unrecognized command\r\n");
 					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 					 if (bytes < 0) break;
@@ -253,7 +271,11 @@ int main(int argc, char *argv[]) {
 				 }
 				 //---
 				 if(strncmp(receive_buffer,"EPRT",4)==0) {
-					 s_data_act = socket(AF_INET6, SOCK_STREAM, 0);
+				 	if(IPV6){
+					 	s_data_act = socket(AF_INET6, SOCK_STREAM, 0);
+					} else {
+						s_data_act = socket(AF_INET, SOCK_STREAM, 0);
+					}
 
 					 int port;
 					 const char delim[] = "|";
@@ -328,8 +350,9 @@ int main(int argc, char *argv[]) {
 
                  //---	
                  if ( (strncmp(receive_buffer,"RETR",4)==0))   {
-					 char * filename;
+					 char filename[80];
 					 // must get filename from the reply
+					 sscanf(receive_buffer, "RETR %s", filename);
 					 FILE *fin=fopen(filename,"r");//open tmp.txt file
 					 //sprintf(send_buffer,"125 Transfering... \r\n");
 					 sprintf(send_buffer,"150 Opening ASCII mode data connection... \r\n");
@@ -353,6 +376,9 @@ int main(int argc, char *argv[]) {
 				 // ---
 				 if ( (strncmp(receive_buffer,"TYPE",4)==0))   {  
 				 	// Stuff
+				 	char mode;
+				 	sscanf(receive_buffer, "TYPE %c", mode);
+
 				 } 
 			 //=================================================================================	 
 			 }//End of COMMUNICATION LOOP per CLIENT
