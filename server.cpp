@@ -362,15 +362,14 @@ int main(int argc, char *argv[]) {
 					 	fileSize = ftell(fin);
 					 	fseek(fin, 0, SEEK_SET);
 
-					 	sprintf(send_buffer, "150 Opening Bnary mode data connection\r\n");
+					 	sprintf(send_buffer, "150 Opening Binary mode data connection\r\n");
 					 	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 
 					 	char temp_buffer[fileSize];
-					 	while(!feof(fin)) {
-    						fread(temp_buffer, 1, sizeof(temp_buffer), fin);
-    						send(s_data_act, temp_buffer, sizeof(temp_buffer), 0);
-							memset(&temp_buffer, 0, sizeof(temp_buffer));
-						}
+
+    					fread(temp_buffer, 1, sizeof(temp_buffer), fin);
+    					send(s_data_act, temp_buffer, sizeof(temp_buffer), 0);
+
 						fclose(fin);
 					  	sprintf(send_buffer,"226 File transfer complete. \r\n");
 					  	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
