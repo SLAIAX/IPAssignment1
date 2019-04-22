@@ -1,0 +1,15 @@
+ Volume in drive C has no label.
+ Volume Serial Number is 060F-6512
+
+ Directory of C:\Users\Benjamin\Documents\Comp Networks Assn1
+
+22/04/2019  01:57 PM    <DIR>          .
+22/04/2019  01:57 PM    <DIR>          ..
+10/04/2019  09:33 AM                18 clean.bat
+10/04/2019  09:33 AM               176 makefile
+22/04/2019  01:56 PM            15,715 server.cpp
+22/04/2019  01:56 PM         3,168,917 server.exe
+22/04/2019  01:56 PM             9,025 server.o
+22/04/2019  01:57 PM                 0 tmp.txt
+               6 File(s)      3,193,851 bytes
+               2 Dir(s)  1,911,568,564,224 bytes free

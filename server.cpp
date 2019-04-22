@@ -274,7 +274,7 @@ int main(int argc, char *argv[]) {
 					 printf("\tCLIENT's Port is %d\n",port);
 					 printf("===================================================\n");
 
-					 char *portStr;
+					 char portStr[20]; 
 					 sprintf(portStr, "%d", port);
 
 					 iResult = getaddrinfo(clientHost, portStr, &hints, &result);
@@ -302,32 +302,58 @@ int main(int argc, char *argv[]) {
 				 //technically, LIST is different than NLST,but we make them the same here
 				 if ( (strncmp(receive_buffer,"LIST",4)==0) || (strncmp(receive_buffer,"NLST",4)==0))   {
 					 //system("ls > tmp.txt");//change that to 'dir', so windows can understand
-					 // system("dir > tmp.txt");
-					 // FILE *fin=fopen("tmp.txt","r");//open tmp.txt file
-					 // //sprintf(send_buffer,"125 Transfering... \r\n");
-					 // sprintf(send_buffer,"150 Opening ASCII mode data connection... \r\n");
-					 // printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
-					 // bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					 // char temp_buffer[80];
-					 // while (!feof(fin)){
-						//  fgets(temp_buffer,78,fin);
-						//  sprintf(send_buffer,"%s",temp_buffer);
-						//  if (active==0) send(ns_data, send_buffer, strlen(send_buffer), 0);
-						//  else send(s_data_act, send_buffer, strlen(send_buffer), 0);
-					 // }
-					 // fclose(fin);
-					 // //sprintf(send_buffer,"250 File transfer completed... \r\n");
-					 // sprintf(send_buffer,"226 File transfer complete. \r\n");
-					 // printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
-					 // bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					 // if (active==0 )closesocket(ns_data);
-					 // else closesocket(s_data_act);
-						 
-					 
+					 system("dir > tmp.txt");
+					 FILE *fin=fopen("tmp.txt","r");//open tmp.txt file
+					 //sprintf(send_buffer,"125 Transfering... \r\n");
+					 sprintf(send_buffer,"150 Opening ASCII mode data connection... \r\n");
+					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+					 char temp_buffer[80];
+					 while (!feof(fin)){
+						 fgets(temp_buffer,78,fin);
+						 sprintf(send_buffer,"%s",temp_buffer);
+						 if (active==0) send(ns_data, send_buffer, strlen(send_buffer), 0);
+						 else send(s_data_act, send_buffer, strlen(send_buffer), 0);
+					 }
+					 fclose(fin);
+					 //sprintf(send_buffer,"250 File transfer completed... \r\n");
+					 sprintf(send_buffer,"226 File transfer complete. \r\n");
+					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+					 if (active==0 )closesocket(ns_data);
+					 else closesocket(s_data_act);
 					 //OPTIONAL, delete the temporary file
-					 //system("del tmp.txt");
+					 system("del tmp.txt");
 				 }
-                 //---			    
+
+                 //---	
+                 if ( (strncmp(receive_buffer,"RETR",4)==0))   {
+					 char * filename;
+					 // must get filename from the reply
+					 FILE *fin=fopen(filename,"r");//open tmp.txt file
+					 //sprintf(send_buffer,"125 Transfering... \r\n");
+					 sprintf(send_buffer,"150 Opening ASCII mode data connection... \r\n");
+					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+					 char temp_buffer[80];
+					 while (!feof(fin)){
+						 fgets(temp_buffer,78,fin);
+						 sprintf(send_buffer,"%s",temp_buffer);
+						 if (active==0) send(ns_data, send_buffer, strlen(send_buffer), 0);
+						 else send(s_data_act, send_buffer, strlen(send_buffer), 0);
+					 }
+					 fclose(fin);
+					 //sprintf(send_buffer,"250 File transfer completed... \r\n");
+					 sprintf(send_buffer,"226 File transfer complete. \r\n");
+					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+					 if (active==0 )closesocket(ns_data);
+					 else closesocket(s_data_act);
+				 }		 
+				 // ---
+				 if ( (strncmp(receive_buffer,"TYPE",4)==0))   {  
+				 	// Stuff
+				 } 
 			 //=================================================================================	 
 			 }//End of COMMUNICATION LOOP per CLIENT
 			 //=================================================================================
