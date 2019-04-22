@@ -22,6 +22,7 @@
 #define _WIN32_WINNT 0x501
 
 #include <stdio.h> 
+#include <iostream>
 #include <string.h>
 #include <stdlib.h>
 #include <winsock2.h>
@@ -251,86 +252,81 @@ int main(int argc, char *argv[]) {
 					 // closesocket(ns);
 				 }
 				 //---
-				 // if(strncmp(receive_buffer,"PORT",4)==0) {
-					//  s_data_act = socket(AF_INET, SOCK_STREAM, 0);
-					//  //local variables
-					//  //unsigned char act_port[2];
-					//  int act_port[2];
-					//  int act_ip[4], port_dec;
-					//  char ip_decimal[40];
-					//  printf("===================================================\n");
-					//  printf("\n\tActive FTP mode, the client is listening... \n");
-					//  active=1;//flag for active connection
-					//  //int scannedItems = sscanf(receive_buffer, "PORT %d,%d,%d,%d,%d,%d",
-					//  //		&act_ip[0],&act_ip[1],&act_ip[2],&act_ip[3],
-					//  //     (int*)&act_port[0],(int*)&act_port[1]);
-					 
-					//  int scannedItems = sscanf(receive_buffer, "PORT %d,%d,%d,%d,%d,%d",
-					// 		&act_ip[0],&act_ip[1],&act_ip[2],&act_ip[3],
-					//       &act_port[0],&act_port[1]);
-					 
-					//  if(scannedItems < 6) {
-		   //       	    sprintf(send_buffer,"501 Syntax error in arguments \r\n");
-					// 	printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
-					// 	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					//     //if (bytes < 0) break;
-			  //           break;
-		   //           }
-					 
-					//  local_data_addr_act->ai_family=AF_INET6; 
-					//  sprintf(ip_decimal, "%d.%d.%d.%d", act_ip[0], act_ip[1], act_ip[2],act_ip[3]);
-					//  printf("\tCLIENT's IP is %s\n",ip_decimal);  //IPv4 format
-					//  local_data_addr_act.sin_addr.s_addr=inet_addr(ip_decimal);  //ipv4 only
-					//  port_dec=act_port[0];
-					//  port_dec=port_dec << 8;
-					//  port_dec=port_dec+act_port[1];
-					//  printf("\tCLIENT's Port is %d\n",port_dec);
-					//  printf("===================================================\n");
-					//  local_data_addr_act.sin_port=htons(port_dec); //ipv4 only
-					//  if (connect(s_data_act, (struct sockaddr *)&local_data_addr_act, (int) sizeof(struct sockaddr)) != 0){
-					// 	 printf("trying connection in %s %d\n",inet_ntoa(local_data_addr_act.sin_addr),ntohs(local_data_addr_act.sin_port));
-					// 	 sprintf(send_buffer, "425 Something is wrong, can't start active connection... \r\n");
-					// 	 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					// 	 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
-					// 	 closesocket(s_data_act);
-					//  }
-					//  else {
-					// 	 sprintf(send_buffer, "200 PORT Command successful\r\n");
-					// 	 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					// 	 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
-					// 	 printf("Connected to client\n");
-					//  }
+				 if(strncmp(receive_buffer,"EPRT",4)==0) {
+					 s_data_act = socket(AF_INET6, SOCK_STREAM, 0);
 
-				 // }
-				 // //---				 
-				 // //technically, LIST is different than NLST,but we make them the same here
-				 // if ( (strncmp(receive_buffer,"LIST",4)==0) || (strncmp(receive_buffer,"NLST",4)==0))   {
-					//  //system("ls > tmp.txt");//change that to 'dir', so windows can understand
-					//  system("dir > tmp.txt");
-					//  FILE *fin=fopen("tmp.txt","r");//open tmp.txt file
-					//  //sprintf(send_buffer,"125 Transfering... \r\n");
-					//  sprintf(send_buffer,"150 Opening ASCII mode data connection... \r\n");
-					//  printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
-					//  bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					//  char temp_buffer[80];
-					//  while (!feof(fin)){
-					// 	 fgets(temp_buffer,78,fin);
-					// 	 sprintf(send_buffer,"%s",temp_buffer);
-					// 	 if (active==0) send(ns_data, send_buffer, strlen(send_buffer), 0);
-					// 	 else send(s_data_act, send_buffer, strlen(send_buffer), 0);
-					//  }
-					//  fclose(fin);
-					//  //sprintf(send_buffer,"250 File transfer completed... \r\n");
-					//  sprintf(send_buffer,"226 File transfer complete. \r\n");
-					//  printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
-					//  bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					//  if (active==0 )closesocket(ns_data);
-					//  else closesocket(s_data_act);
+					 int port;
+					 const char delim[] = "|";
+					 char *token;
+					 token = strtok(receive_buffer, delim);
+					 for(int i = 0; i < 3; i++){
+					 	token = strtok(NULL, delim);
+					 }
+					 sscanf(token, "%d", &port);
+					 printf("port is %d\n", port);
+
+					 
+					 printf("===================================================\n");
+					 printf("\n\tActive FTP mode, the client is listening... \n");
+					 active=1;//flag for active connection
+					 
+					 printf("\tCLIENT's IP is %s\n", clientHost);  
+					 printf("\tCLIENT's Port is %d\n",port);
+					 printf("===================================================\n");
+
+					 char *portStr;
+					 sprintf(portStr, "%d", port);
+
+					 iResult = getaddrinfo(clientHost, portStr, &hints, &result);
+					 if(iResult != 0) {
+					 	printf("getaddrinfo failed: %d\n", iResult);
+					 	WSACleanup();
+					 	exit(27);
+					 }
+
+					 if (connect(s_data_act, result->ai_addr, result->ai_addrlen) != 0){
+						 sprintf(send_buffer, "425 Something is wrong, can't start active connection... \r\n");
+						 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+						 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+						 closesocket(s_data_act);
+					 }
+					 else {
+						 sprintf(send_buffer, "200 EPRT Command successful\r\n");
+						 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+						 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+						 printf("Connected to client\n");
+					 }
+
+				 }
+				 //---				 
+				 //technically, LIST is different than NLST,but we make them the same here
+				 if ( (strncmp(receive_buffer,"LIST",4)==0) || (strncmp(receive_buffer,"NLST",4)==0))   {
+					 //system("ls > tmp.txt");//change that to 'dir', so windows can understand
+					 // system("dir > tmp.txt");
+					 // FILE *fin=fopen("tmp.txt","r");//open tmp.txt file
+					 // //sprintf(send_buffer,"125 Transfering... \r\n");
+					 // sprintf(send_buffer,"150 Opening ASCII mode data connection... \r\n");
+					 // printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+					 // bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+					 // char temp_buffer[80];
+					 // while (!feof(fin)){
+						//  fgets(temp_buffer,78,fin);
+						//  sprintf(send_buffer,"%s",temp_buffer);
+						//  if (active==0) send(ns_data, send_buffer, strlen(send_buffer), 0);
+						//  else send(s_data_act, send_buffer, strlen(send_buffer), 0);
+					 // }
+					 // fclose(fin);
+					 // //sprintf(send_buffer,"250 File transfer completed... \r\n");
+					 // sprintf(send_buffer,"226 File transfer complete. \r\n");
+					 // printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+					 // bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+					 // if (active==0 )closesocket(ns_data);
+					 // else closesocket(s_data_act);
 						 
 					 
-					//  //OPTIONAL, delete the temporary file
-					//  //system("del tmp.txt");
-				 // }
+					 //OPTIONAL, delete the temporary file
+					 //system("del tmp.txt");
+				 }
                  //---			    
 			 //=================================================================================	 
 			 }//End of COMMUNICATION LOOP per CLIENT
