@@ -520,6 +520,7 @@ int main(int argc, char *argv[]) {
 									continue;
 						 		}
 				 			}
+				 			getcwd(directory, sizeof(directory));
 				 			sprintf(send_buffer,"200 Directory changed to %s \r\n", directory);
 						 	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 							if (bytes < 0) break; 
