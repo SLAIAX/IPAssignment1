@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
   		 int s, ns;
   		 int ns_data, s_data_act;
   	#elif defined _WIN32
-		 SOCKET s,ns;
+		 SOCKET s, ns;
 		 SOCKET ns_data, s_data_act;
 	#endif
 
@@ -147,8 +147,8 @@ int main(int argc, char *argv[]) {
 			    WSACleanup();
 			#endif    
 			    return 1;
-			}	
-		 }
+		 }	
+		
 
 		 #if defined __unix__ || defined __APPLE__
 		  	s = -1;
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
 		 #endif
 
 		 s = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-		 #if defined __unix__ || defined __APPLE__
+		#if defined __unix__ || defined __APPLE__
 		  	if (s < 0) {
 		      printf("socket failed\n");
 		      freeaddrinfo(result);
@@ -193,7 +193,7 @@ int main(int argc, char *argv[]) {
 	      return 1;
 	    }
 
-		 freeaddrinfo(result);
+		freeaddrinfo(result);
 		 
 //********************************************************************
 //LISTEN
