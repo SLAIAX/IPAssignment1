@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
 
 		 char mode = 'A';
 		
-         ns_data=INVALID_SOCKET;
+         ns_data=-1;
 
 		 int active=0;
 		 int n,bytes,addrlen;
@@ -389,7 +389,11 @@ int main(int argc, char *argv[]) {
 					 iResult = getaddrinfo(clientHost, portStr, &hints, &result);
 					 if(iResult != 0) {
 					 	printf("getaddrinfo failed: %d\n", iResult);
-					 	WSACleanup();
+						#if defined __unix__ || defined __APPLE__
+							//test
+						#elif defined _WIN32 
+					 		WSACleanup();
+						#endif
 					 	exit(27);
 					 }
 
@@ -397,7 +401,12 @@ int main(int argc, char *argv[]) {
 						 sprintf(send_buffer, "425 Something is wrong, can't start active connection... \r\n");
 						 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 						 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
-						 closesocket(s_data_act);
+						#if defined __unix__ || defined __APPLE__
+					    		close(s_data_act);//close listening socket
+						#elif defined _WIN32 
+							closesocket(s_data_act);
+							WSACleanup();
+						#endif
 					 }
 					 else {
 						 sprintf(send_buffer, "200 EPRT Command successful\r\n");
@@ -418,8 +427,13 @@ int main(int argc, char *argv[]) {
 					 } else {
 					 	sprintf(send_buffer,"510 Directory command failed \r\n");
 					  	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					  	if (active==0 )closesocket(ns_data);
-					 	else closesocket(s_data_act);
+						#if defined __unix__ || defined __APPLE__
+					  		if (active==0 )close(ns_data);
+					 		else close(s_data_act);
+						#elif defined _WIN32 
+					  		if (active==0 )closesocket(ns_data);
+					 		else closesocket(s_data_act);
+						#endif
 					  	break;
 					 }
 					 sprintf(send_buffer,"150 Opening ASCII mode data connection... \r\n");
@@ -436,8 +450,13 @@ int main(int argc, char *argv[]) {
 					 sprintf(send_buffer,"226 File transfer complete. \r\n");
 					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					 if (active==0 )closesocket(ns_data);
-					 else closesocket(s_data_act);
+					 #if defined __unix__ || defined __APPLE__
+					  		if (active==0 )close(ns_data);
+					 		else close(s_data_act);
+						#elif defined _WIN32 
+					  		if (active==0 )closesocket(ns_data);
+					 		else closesocket(s_data_act);
+						#endif
 					 //OPTIONAL, delete the temporary file
 					 system("del tmp.txt");
 				 }
@@ -463,8 +482,13 @@ int main(int argc, char *argv[]) {
 					 } else {
     					sprintf(send_buffer,"550 File transfer failed. File does not exist in directory. \r\n");
 					  	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-					  	if (active==0 )closesocket(ns_data);
-						else closesocket(s_data_act);
+					  	#if defined __unix__ || defined __APPLE__
+					  		if (active==0 )close(ns_data);
+					 		else close(s_data_act);
+						#elif defined _WIN32 
+					  		if (active==0 )closesocket(ns_data);
+					 		else closesocket(s_data_act);
+						#endif
 					  	break;
 					 }
 					 // TEST CODE
@@ -484,8 +508,15 @@ int main(int argc, char *argv[]) {
 					  	sprintf(send_buffer,"226 File transfer complete. \r\n");
 					  	printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 					  	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-						if (active==0 )closesocket(ns_data);
-						else closesocket(s_data_act);
+
+						#if defined __unix__ || defined __APPLE__
+					  		if (active==0 )close(ns_data);
+					 		else close(s_data_act);
+						#elif defined _WIN32 
+					  		if (active==0 )closesocket(ns_data);
+					 		else closesocket(s_data_act);
+						#endif
+//break?
 				 }		 
 				 // ---
 				 if ( (strncmp(receive_buffer,"TYPE",4)==0))   {  			 	
@@ -572,7 +603,7 @@ int main(int argc, char *argv[]) {
 		 } //End of MAIN LOOP
 		 //====================================================================================
 	#if defined __unix__ || defined __APPLE__
-    	close(s);//close listening socket
+    		close(s);//close listening socket
 	#elif defined _WIN32 
 		closesocket(s);
 		WSACleanup();
