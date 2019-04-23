@@ -22,28 +22,22 @@
 
 #define IPV6 true
 
-#if defined __unix__ || defined __APPLE__
-  #include <unistd.h>
-  #include <errno.h>
-  #include <stdlib.h>
-  #include <stdio.h>
-  #include <string.h>
-  #include <sys/types.h>
-  #include <sys/socket.h>
-  #include <arpa/inet.h>
-  #include <netdb.h> //used by getnameinfo()
-  #include <iostream>
-#elif defined _WIN32
-	#define _WIN32_WINNT 0x501
 
 	#include <stdio.h> 
-	#include <iostream>
+	#include <unistd.h>
 	#include <string.h>
 	#include <stdlib.h>
+	#include <iostream>
+#if defined __unix__ || defined __APPLE__
+  	#include <errno.h>
+  	#include <sys/types.h>
+  	#include <sys/socket.h>
+  	#include <arpa/inet.h>
+  	#include <netdb.h> //used by getnameinfo()
+#elif defined _WIN32
+	#define _WIN32_WINNT 0x501
 	#include <winsock2.h>
 	#include <ws2tcpip.h>
-	#include <unistd.h>
-
 	#define WSVERS MAKEWORD(2,2)
 
 	WSADATA wsadata;
