@@ -323,9 +323,10 @@ int main(int argc, char *argv[]) {
 				 if ( (strncmp(receive_buffer,"LIST",4)==0) || (strncmp(receive_buffer,"NLST",4)==0))   {
 					 //system("ls > tmp.txt");//change that to 'dir', so windows can understand
 					 system("dir > tmp.txt");
+					 FILE *fin;
 					 if( access( "tmp.txt", F_OK ) != -1 ) {
 					 	// file exists
-					 	FILE *fin=fopen("tmp.txt","r");//open tmp.txt file
+					 	fin=fopen("tmp.txt","r");//open tmp.txt file
 					 } else {
 					 	sprintf(send_buffer,"510 Directory command failed \r\n");
 					  	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
@@ -408,6 +409,28 @@ int main(int argc, char *argv[]) {
 				 	}
 				 	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 					if (bytes < 0) break;
+				 } 
+				 // ---
+				 if ( (strncmp(receive_buffer,"CWD",3)==0))   {  
+				 	char directory[100];
+				 	sscanf(receive_buffer, "CWD %s", directory);
+				 	printf("%s", directory);
+				 	if (chdir(directory) == 0){
+				 		sprintf(send_buffer,"200 Directory changed to %s \r\n", directory);
+				 		bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+						if (bytes < 0) break;
+				 	} else {
+				 		sprintf(send_buffer,"510 No directory found at %s \r\n", directory);
+				 		bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+						if (bytes < 0) break;
+				 	}
+				 }
+				 if ( (strncmp(receive_buffer,"XPWD",4)==0))   {
+				 	char directory[100]; 
+				 	getcwd(directory, sizeof(directory));
+				 	sprintf(send_buffer,"200 Working Directory is %s\r\n", directory);
+				 	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+				 	if (bytes < 0) break;
 				 } 
 			 //=================================================================================	 
 			 }//End of COMMUNICATION LOOP per CLIENT
