@@ -89,6 +89,9 @@ int main(int argc, char *argv[]) {
 
 		 bool isAuth = false;
 
+		 char serverRoot[100];
+		 getcwd(serverRoot, sizeof(serverRoot));
+
 		 char username[80];
 		 char password[80];
 
@@ -268,6 +271,8 @@ int main(int argc, char *argv[]) {
 				printf("\n============================================================================\n");
 	 		 	printf("connected to [CLIENT's IP %s , port %s] through SERVER's port %s", clientHost, clientService, portNum);     
 			 	printf("\n============================================================================\n");
+
+			 	chdir(serverRoot); // Resets the working directory for a new connection to the server root
 			 }
 //********************************************************************
 //Respond with welcome message
@@ -494,23 +499,39 @@ int main(int argc, char *argv[]) {
 					if (bytes < 0) break;
 				 } 
 				 // ---
-				 if ( (strncmp(receive_buffer,"CWD",3)==0))   {  
+				 if ( (strncmp(receive_buffer,"CWD",3)==0)) {  
 				 	char directory[100];
 				 	sscanf(receive_buffer, "CWD %s", directory);
-				 	if(strstr(directory, "secret") != NULL){
-				 		// if the secret folder is in the directory
-				 		if(!isAuth){
+				 	char current[100];
+				 	getcwd(current, sizeof(current));
+				 	char newdir[100];
+				 	// Check dir exists
+				 	if(chdir(directory) == 0){
+				 		// Check that they are allowed in this directory if not, send back to previous and send error
+				 		getcwd(newdir, sizeof(newdir));
+				 		if(strncmp(serverRoot, newdir, strlen(serverRoot)) == 0){
+				 			if(strstr(directory, "secret") != NULL){
+				 				// if the secret folder is in the directory
+						 		if(!isAuth){
+						 			chdir(current);
+						 			sprintf(send_buffer, "530 Unauthorized directory.\r\n");
+						 			bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+									if (bytes < 0) break;
+									continue;
+						 		}
+				 			}
+				 			sprintf(send_buffer,"200 Directory changed to %s \r\n", directory);
+						 	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+							if (bytes < 0) break; 
+				 		} else {
+				 			// not allowed here, go back
+				 			chdir(current);
 				 			sprintf(send_buffer, "530 Unauthorized directory.\r\n");
 				 			bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 							if (bytes < 0) break;
 							continue;
 				 		}
-				 	} 
-				 	if (chdir(directory) == 0){
-				 		sprintf(send_buffer,"200 Directory changed to %s \r\n", directory);
-				 		bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-						if (bytes < 0) break;
-				 	} else {
+				 	} else { 
 				 		sprintf(send_buffer,"510 No directory found at %s \r\n", directory);
 				 		bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 						if (bytes < 0) break;
