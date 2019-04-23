@@ -98,8 +98,8 @@ int main(int argc, char *argv[]) {
 	int iResult;
 
 	memset(&hints,0,sizeof(addrinfo));
-	memset(&localaddr,0,sizeof(localaddr));//clean up the structure
-	memset(&remoteaddr,0,sizeof(remoteaddr));//clean up the structure
+	memset(&localaddr,0,sizeof(localaddr));
+	memset(&remoteaddr,0,sizeof(remoteaddr));
 		 
 //********************************************************************
 //SOCKET
@@ -132,26 +132,18 @@ int main(int argc, char *argv[]) {
 			return 1;
 	}	
 		
-	#if defined __unix__ || defined __APPLE__
-		s = -1;
-	#elif defined _WIN32
-		s = INVALID_SOCKET;
-	#endif
+	s = -1;
 
 	s = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-	#if defined __unix__ || defined __APPLE__
-		if (s < 0) {
-		    printf("socket failed\n");
-		    freeaddrinfo(result);
-		}
-	#elif defined _WIN32
-		if (s == INVALID_SOCKET) {
-			printf("socket failed\n");
-			freeaddrinfo(result);
-			WSACleanup();
-			exit(27);
-		}
-	#endif 	
+	
+	if (s < 0) {
+	    printf("socket failed\n");
+	    freeaddrinfo(result);
+	    #if defined _WIN32
+	    	WSACleanup();
+	    #endif
+	    exit(27);
+	} 	
 		 
 //********************************************************************
 //BIND
