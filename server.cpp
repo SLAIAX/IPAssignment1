@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
 
 		 char send_buffer[200],receive_buffer[200];
 
-		 char mode = 'A';
+		 char mode = 'I';
 		
          ns_data=-1;
 
@@ -302,7 +302,7 @@ int main(int argc, char *argv[]) {
 				 //=======================================================
 				 if ((bytes < 0) || (bytes == 0)) break;
 
-				 printf("<< DEBUG INFO. >>: the message from the CLIENT reads: '%s\\r\\n' \n", receive_buffer);
+				 //printf("<< DEBUG INFO. >>: the message from the CLIENT reads: '%s\\r\\n' \n", receive_buffer);
 
 //********************************************************************
 //PROCESS COMMANDS/REQUEST FROM USER
@@ -326,7 +326,7 @@ int main(int argc, char *argv[]) {
 					 	sprintf(send_buffer,"230 Public login sucessful\r\n");
 					 	isAuth = false;
 					 }
-					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+					 //printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 					 if (bytes < 0) break;
 				 }
@@ -338,14 +338,14 @@ int main(int argc, char *argv[]) {
 					 #elif defined _WIN32
 					 sprintf(send_buffer,"215 Windows 64-bit\r\n");
 					 #endif
-					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+					 //printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 					 if (bytes < 0) break;
 				 }
 				 //---
 				 if (strncmp(receive_buffer,"OPTS",4)==0)  {
 					 sprintf(send_buffer,"550 unrecognized command\r\n");
-					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+					 //printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 					 if (bytes < 0) break;
 				 }
@@ -353,7 +353,7 @@ int main(int argc, char *argv[]) {
 				 if (strncmp(receive_buffer,"QUIT",4)==0)  {
 					 printf("Quit \n");
 					 sprintf(send_buffer,"221 Connection close by client\r\n");
-					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+					 //printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 					 if (bytes < 0) break;
 				 }
@@ -398,7 +398,7 @@ int main(int argc, char *argv[]) {
 					 if (connect(s_data_act, result->ai_addr, result->ai_addrlen) != 0){
 						 sprintf(send_buffer, "425 Something is wrong, can't start active connection... \r\n");
 						 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-						 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+						 //printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 						#if defined __unix__ || defined __APPLE__
 					    		close(s_data_act);//close listening socket
 						#elif defined _WIN32 
@@ -409,7 +409,7 @@ int main(int argc, char *argv[]) {
 					 else {
 						 sprintf(send_buffer, "200 EPRT Command successful\r\n");
 						 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
-						 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+						 //printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 						 printf("Connected to client\n");
 					 }
 				 }
@@ -438,7 +438,7 @@ int main(int argc, char *argv[]) {
 					  	break;
 					 }
 					 sprintf(send_buffer,"150 Opening ASCII mode data connection... \r\n");
-					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+					 //printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 					 char temp_buffer[80];
 					 while (!feof(fin)){
@@ -449,7 +449,7 @@ int main(int argc, char *argv[]) {
 					 }
 					 fclose(fin);
 					 sprintf(send_buffer,"226 File transfer complete. \r\n");
-					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+					 //printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 					 #if defined __unix__ || defined __APPLE__
 					  		if (active==0 )close(ns_data);
@@ -473,11 +473,11 @@ int main(int argc, char *argv[]) {
 						 if(mode == 'I'){
 						 	fin=fopen(filename,"rb");
 						 	sprintf(send_buffer, "150 Opening Binary mode data connection\r\n");
-						 	printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+						 	//printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 						 } else {
 						 	fin=fopen(filename,"r");
 						 	sprintf(send_buffer,"150 Opening ASCII mode data connection... \r\n");
-						 	printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+						 	//printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 						 }
 						 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 					 } else {
@@ -507,7 +507,7 @@ int main(int argc, char *argv[]) {
 
 						fclose(fin);
 					  	sprintf(send_buffer,"226 File transfer complete. \r\n");
-					  	printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+					  	//printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 					  	bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 
 						#if defined __unix__ || defined __APPLE__
