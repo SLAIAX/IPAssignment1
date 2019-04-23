@@ -285,13 +285,14 @@ int main(int argc, char *argv[]) {
 				// get password
 				sscanf(receive_buffer, "PASS %s", password);
 				if((strcmp(username, "napoleon") == 0) && (strcmp(password, "334") == 0)){
-					sprintf(send_buffer,"230 Public login sucessful\r\n");
+					sprintf(send_buffer,"230 Private login sucessful, User: Napoleon\r\n");
 					isAuth = true;
 				} else {
 					sprintf(send_buffer,"230 Public login sucessful\r\n");
 					isAuth = false;
 				}
-					//printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
+				printf("Logged in.\n");
+				//printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 				bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 				if (bytes < 0) break;
 			}
@@ -379,7 +380,7 @@ int main(int argc, char *argv[]) {
 			//technically, LIST is different than NLST,but we make them the same here
 			if ( (strncmp(receive_buffer,"LIST",4)==0) || (strncmp(receive_buffer,"NLST",4)==0))   {
 				#if defined __unix__ || __APPLE__
-					system("ls > tmp.txt");//change that to 'dir', so windows can understand
+					system("ls > tmp.txt");
 				#elif defined _WIN32
 					system("dir > tmp.txt");
 				#endif
@@ -553,9 +554,8 @@ int main(int argc, char *argv[]) {
 		    } 
 		#endif 
 			printf("DISCONNECTED from %s\n",clientHost);
-			//sprintf(send_buffer, "221 Bye bye, server close the connection ... \r\n");
-			//printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
-			//bytes = send(ns, send_buffer, strlen(send_buffer), 0);	 
+			sprintf(send_buffer, "221 Bye bye, server close the connection ... \r\n");
+			bytes = send(ns, send_buffer, strlen(send_buffer), 0);	 
 		//====================================================================================
 	}   //End of MAIN LOOP
 		//====================================================================================
