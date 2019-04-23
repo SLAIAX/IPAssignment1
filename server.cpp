@@ -576,7 +576,7 @@ int main(int argc, char *argv[]) {
 						if (bytes < 0) break;
 				 	}
 				 }
-				 if ( (strncmp(receive_buffer,"XPWD",4)==0))   {
+				 if ( (strncmp(receive_buffer,"XPWD",4)==0) || (strncmp(receive_buffer,"PWD",3)==0))   {
 				 	char directory[100]; 
 				 	getcwd(directory, sizeof(directory));
 				 	sprintf(send_buffer,"200 Working Directory is %s\r\n", directory);
