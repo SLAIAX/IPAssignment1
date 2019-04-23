@@ -339,7 +339,11 @@ int main(int argc, char *argv[]) {
 				 //---
 				 if (strncmp(receive_buffer,"SYST",4)==0)  {
 					 printf("Information about the system \n");
+					 #if defined __unix__ || defined __APPLE__
+					 sprintf(send_buffer,"215 Unix\r\n");
+					 #elif defined _WIN32
 					 sprintf(send_buffer,"215 Windows 64-bit\r\n");
+					 #endif
 					 printf("<< DEBUG INFO. >>: REPLY sent to CLIENT: %s\n", send_buffer);
 					 bytes = send(ns, send_buffer, strlen(send_buffer), 0);
 					 if (bytes < 0) break;
@@ -418,8 +422,11 @@ int main(int argc, char *argv[]) {
 				 //---				 
 				 //technically, LIST is different than NLST,but we make them the same here
 				 if ( (strncmp(receive_buffer,"LIST",4)==0) || (strncmp(receive_buffer,"NLST",4)==0))   {
-					 //system("ls > tmp.txt");//change that to 'dir', so windows can understand
+					 #if defined __unix__ || __APPLE__
+					 system("ls > tmp.txt");//change that to 'dir', so windows can understand
+					 #elif defined _WIN32
 					 system("dir > tmp.txt");
+					 #endif
 					 FILE *fin;
 					 if( access( "tmp.txt", F_OK ) != -1 ) {
 					 	// file exists
