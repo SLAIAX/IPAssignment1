@@ -150,20 +150,18 @@ int main(int argc, char *argv[]) {
 //********************************************************************
 	iResult = bind(s, result->ai_addr, (int)result->ai_addrlen);
 
-	#if defined __unix__ || defined __APPLE__
-		if (iResult == -1) {
-		    printf( "\nbind failed\n"); 
-		    freeaddrinfo(result);
+	
+	if (iResult == -1) {
+		printf( "\nBind failed\n"); 
+		freeaddrinfo(result);
+		#if defined __unix__ || defined __APPLE__
 		    close(s);//close socket
-	#elif defined _WIN32
-		if (iResult == SOCKET_ERROR) {
-			printf("Bind failed! %d\n", WSAGetLastError());
-			freeaddrinfo(result);
+		#elif defined _WIN32
 			closesocket(s);
 			WSACleanup();
-	#endif       
-	    	return 1;
-		}
+		#endif       
+	    return 1;
+	}
 
 	freeaddrinfo(result);
 		 
@@ -204,11 +202,7 @@ int main(int argc, char *argv[]) {
 		printf("SERVER is waiting for an incoming connection request...");
 		printf("\n------------------------------------------------------------------------\n");
 
-		#if defined __unix__ || defined __APPLE__
-		    ns = -1;
-		#elif defined _WIN32
-		    ns = INVALID_SOCKET;
-		#endif
+		ns = -1;
 
 		#if defined __unix__ || defined __APPLE__     
 		    ns = accept(s,(struct sockaddr *)(&remoteaddr),(socklen_t*)&addrlen); //IPV4 & IPV6-compliant
@@ -216,32 +210,29 @@ int main(int argc, char *argv[]) {
 			ns = accept(s,(struct sockaddr *)(&remoteaddr),&addrlen); 
 		#endif
 
-		#if defined __unix__ || defined __APPLE__
-			if (ns == -1) {
-			    printf("\naccept failed\n");
-			    close(s);
-			    return 1;
-			}
-		#elif defined _WIN32	 	 
-			if (ns == INVALID_SOCKET ){
+		
+		if (ns == -1) {
+			#if defined __unix__ || defined __APPLE__
+		    	printf("\naccept failed\n");
+		    	close(s);
+		    #elif defined _WIN32	 	 
 			 	printf("accept failed: %d\n", WSAGetLastError());
 			 	closesocket(s);
 			 	WSACleanup();
-			 	exit(1);
-			}
-		#endif	  
-			else {
-			 	memset(clientHost, 0, sizeof(clientHost));
-			 	memset(clientService, 0, sizeof(clientService));
+			#endif	
+		    return 1;
+		} else {
+		 	memset(clientHost, 0, sizeof(clientHost));
+		 	memset(clientService, 0, sizeof(clientService));
 
-			 	getnameinfo((struct sockaddr *)&remoteaddr, addrlen, clientHost, sizeof(clientHost), clientService, sizeof(clientService), NI_NUMERICHOST);
+		 	getnameinfo((struct sockaddr *)&remoteaddr, addrlen, clientHost, sizeof(clientHost), clientService, sizeof(clientService), NI_NUMERICHOST);
 
-				printf("\n============================================================================\n");
-	 		 	printf("connected to [CLIENT's IP %s , port %s] through SERVER's port %s", clientHost, clientService, portNum);     
-			 	printf("\n============================================================================\n");
+			printf("\n============================================================================\n");
+ 		 	printf("connected to [CLIENT's IP %s , port %s] through SERVER's port %s", clientHost, clientService, portNum);     
+		 	printf("\n============================================================================\n");
 
-			 	chdir(serverRoot); // Resets the working directory for a new connection to the server root
-			}
+		 	chdir(serverRoot); // Resets the working directory for a new connection to the server root
+		}
 //********************************************************************
 //Respond with welcome message
 //*******************************************************************
