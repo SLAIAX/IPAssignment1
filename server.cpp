@@ -414,7 +414,15 @@ int main(int argc, char *argv[]) {
 				 if ( (strncmp(receive_buffer,"CWD",3)==0))   {  
 				 	char directory[100];
 				 	sscanf(receive_buffer, "CWD %s", directory);
-				 	printf("%s", directory);
+				 	if(strstr(directory, "secret") != NULL){
+				 		// if the secret folder is in the directory
+				 		if(!isAuth){
+				 			sprintf(send_buffer, "530 Unauthorized directory.\r\n");
+				 			bytes = send(ns, send_buffer, strlen(send_buffer), 0);
+							if (bytes < 0) break;
+							continue;
+				 		}
+				 	} 
 				 	if (chdir(directory) == 0){
 				 		sprintf(send_buffer,"200 Directory changed to %s \r\n", directory);
 				 		bytes = send(ns, send_buffer, strlen(send_buffer), 0);
