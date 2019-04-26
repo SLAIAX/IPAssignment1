@@ -1,8 +1,0 @@
-server.out		: 	server.o 
-	g++ server.cpp -o server.out
-			
-server.o		:	server.cpp 
-	g++ -c -Wall -O2 server.cpp
-
-clean:
-	$(RM) server
